@@ -8,13 +8,14 @@ import (
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 
 	"github.com/dacousb/feiok/packet"
 )
 
 const (
-	screenWidth  = 640
-	screenHeight = 480
+	screenWidth  = 960
+	screenHeight = 540
 )
 
 type Game struct {
@@ -55,6 +56,10 @@ func (g *Game) Run(host string) {
 }
 
 func (g *Game) Update() error {
+	if inpututil.IsKeyJustPressed(ebiten.KeyF11) {
+		ebiten.SetFullscreen(!ebiten.IsFullscreen())
+	}
+
 	if ebiten.IsKeyPressed(ebiten.KeyW) {
 		g.main.y -= 0.1
 		g.main.looking = packet.LOOKING_B
