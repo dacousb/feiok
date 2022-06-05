@@ -16,6 +16,10 @@ const (
 	timeOut = 10
 )
 
+const (
+	wheatGrowthInterval = 10
+)
+
 type Tile struct {
 	stage packet.WheatStage
 	last  time.Time
@@ -127,15 +131,21 @@ func (s *Server) handleConn(conn net.Conn) {
 		case packet.ASK_PLANT_CLIENT:
 			var p packet.Packet
 
-			s.mutex.RLock()
+			s.mutex.Lock()
 			p.PushByte(byte(s.width))
 			p.PushByte(byte(s.height))
 			for y := 0; y < s.height; y++ {
 				for x := 0; x < s.width; x++ {
+					if time.Since(s.tiles[y][x].last).Seconds() > wheatGrowthInterval &&
+						s.tiles[y][x].stage > packet.WHEAT_0 && s.tiles[y][x].stage < packet.WHEAT_4 {
+
+						s.tiles[y][x].last = time.Now()
+						s.tiles[y][x].stage += 1
+					}
 					p.PushByte(byte(s.tiles[y][x].stage))
 				}
 			}
-			s.mutex.RUnlock()
+			s.mutex.Unlock()
 
 			conn.Write(packet.NewPacket(packet.SEND_PLANT_SERVER, p))
 		}

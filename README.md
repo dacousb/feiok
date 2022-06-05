@@ -12,7 +12,7 @@ A vibrant, isometric, multiplayer-centric farming game written in Go.
 
 ### Game
 
-- Introduce wheat growth and harvesting.
+- Introduce wheat harvesting.
 - Introduce a UI library (title screen, inventory, etc.).
 - Introduce more player interaction mechanics.
 
