@@ -23,6 +23,7 @@ type Game struct {
 	main          *Player
 	players       []*Player
 	width, height int
+	wheat         uint32
 
 	host       string
 	motd       string
@@ -48,6 +49,8 @@ func (g *Game) Run(host string) {
 
 	go g.askPlayers()
 	go g.askPlant()
+	go g.askStats()
+
 	go g.responsePool()
 
 	if err := ebiten.RunGame(g); err != nil {
@@ -83,6 +86,10 @@ func (g *Game) Update() error {
 		g.sendPlant()
 	}
 
+	if ebiten.IsKeyPressed(ebiten.KeyShift) {
+		g.sendHarvest()
+	}
+
 	return nil
 }
 
@@ -90,8 +97,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	g.drawTiles(screen)
 	g.drawPlayers(screen)
 	ebitenutil.DebugPrint(screen,
-		fmt.Sprintf("fps: %0.f\nhost: %s\nmotd: %s\nx: %0.2f y: %0.2f",
-			ebiten.CurrentFPS(), g.host, g.motd, g.main.x, g.main.y))
+		fmt.Sprintf("fps: %0.f\nhost: %s\nmotd: %s\nx: %0.2f y: %0.2f\nwheat: %d",
+			ebiten.CurrentFPS(), g.host, g.motd, g.main.x, g.main.y, g.wheat))
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {

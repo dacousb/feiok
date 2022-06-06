@@ -37,6 +37,7 @@ type Server struct {
 	players       map[string]*Player
 	tiles         [][]*Tile
 	width, height int
+	wheat         uint32
 
 	mutex sync.RWMutex
 }
@@ -148,6 +149,26 @@ func (s *Server) handleConn(conn net.Conn) {
 			s.mutex.Unlock()
 
 			conn.Write(packet.NewPacket(packet.SEND_PLANT_SERVER, p))
+
+		case packet.SEND_HARVEST_CLIENT:
+			x, _ := packet.ReadByte(conn)
+			y, _ := packet.ReadByte(conn)
+
+			s.mutex.Lock()
+			if s.tiles[y][x].stage == packet.WHEAT_4 {
+				s.wheat += 1
+				s.tiles[y][x].stage = packet.WHEAT_0
+			}
+			s.mutex.Unlock()
+
+		case packet.ASK_STATS_CLIENT:
+			var p packet.Packet
+
+			s.mutex.RLock()
+			p.PushUint32(s.wheat)
+			s.mutex.RUnlock()
+
+			conn.Write(packet.NewPacket(packet.SEND_STATS_SERVER, p))
 		}
 	}
 }

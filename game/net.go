@@ -34,6 +34,13 @@ func (g *Game) askPlant() {
 	}
 }
 
+func (g *Game) askStats() {
+	for {
+		time.Sleep(serverInterval * time.Millisecond)
+		g.sendPacket(packet.NewPacket(packet.ASK_STATS_CLIENT, packet.Packet{}))
+	}
+}
+
 func (g *Game) sendPlayer() {
 	var p packet.Packet
 	p.PushString(g.main.name)
@@ -50,6 +57,14 @@ func (g *Game) sendPlant() {
 	p.PushByte(byte(math.Round(g.main.y)))
 
 	g.sendPacket(packet.NewPacket(packet.SEND_PLANT_CLIENT, p))
+}
+
+func (g *Game) sendHarvest() {
+	var p packet.Packet
+	p.PushByte(byte(math.Round(g.main.x)))
+	p.PushByte(byte(math.Round(g.main.y)))
+
+	g.sendPacket(packet.NewPacket(packet.SEND_HARVEST_CLIENT, p))
 }
 
 func (g *Game) sendPacket(b []byte) {
@@ -92,6 +107,9 @@ func (g *Game) responsePool() {
 				}
 			}
 			g.data_mutex.Unlock()
+
+		case packet.SEND_STATS_SERVER:
+			g.wheat = Try(packet.ReadUint32(g.conn))
 
 		default:
 			log.Fatalf("got an unknown packet prefix (%d)", prefix)

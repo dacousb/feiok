@@ -16,6 +16,9 @@ const (
 	SEND_PLANT_CLIENT               // the client sends a new planted tile
 	ASK_PLANT_CLIENT                // the client asks for the tiles
 	SEND_PLANT_SERVER               // the server sends the tiles
+	SEND_HARVEST_CLIENT             // the client asks the server to harvest a tile
+	ASK_STATS_CLIENT                // the client asks for the server stats
+	SEND_STATS_SERVER               // the server sends its stats
 )
 
 type LookingAt byte
