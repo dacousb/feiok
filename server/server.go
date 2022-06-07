@@ -84,91 +84,19 @@ func (s *Server) handleConn(conn net.Conn) {
 
 		switch prefix {
 		case packet.ASK_MOTD_CLIENT:
-			var p packet.Packet
-
-			p.PushString(motd)
-			conn.Write(packet.NewPacket(packet.SEND_MOTD_SERVER, p))
-
+			s.askMotdClient(conn)
 		case packet.SEND_PLAYER_CLIENT:
-			name, _ := packet.ReadString(conn)
-			looking, _ := packet.ReadByte(conn)
-			x, _ := packet.ReadFloat(conn)
-			y, _ := packet.ReadFloat(conn)
-
-			s.mutex.Lock()
-			s.players[uuid] = &Player{x, y, packet.LookingAt(looking), name, time.Now()}
-			s.mutex.Unlock()
-
+			s.sendPlayerClient(conn, uuid)
 		case packet.ASK_PLAYERS_CLIENT:
-			var p packet.Packet
-
-			s.mutex.Lock()
-			p.PushUint32(uint32(len(s.players) - 1))
-			for k, v := range s.players {
-				if k == uuid {
-					continue
-				}
-				p.PushString(v.name)
-				p.PushByte(byte(v.looking))
-				p.PushFloat(v.x)
-				p.PushFloat(v.y)
-				if time.Since(v.last).Seconds() > timeOut {
-					delete(s.players, k)
-				}
-			}
-			s.mutex.Unlock()
-
-			conn.Write(packet.NewPacket(packet.SEND_PLAYERS_SERVER, p))
-
+			s.askPlayersClient(conn, uuid)
 		case packet.SEND_PLANT_CLIENT:
-			x, _ := packet.ReadByte(conn)
-			y, _ := packet.ReadByte(conn)
-
-			s.mutex.Lock()
-			s.tiles[y][x].stage = packet.WHEAT_1
-			s.tiles[y][x].last = time.Now()
-			s.mutex.Unlock()
-
+			s.sendPlantClient(conn)
 		case packet.ASK_PLANT_CLIENT:
-			var p packet.Packet
-
-			s.mutex.Lock()
-			p.PushByte(byte(s.width))
-			p.PushByte(byte(s.height))
-			for y := 0; y < s.height; y++ {
-				for x := 0; x < s.width; x++ {
-					if time.Since(s.tiles[y][x].last).Seconds() > wheatGrowthInterval &&
-						s.tiles[y][x].stage > packet.WHEAT_0 && s.tiles[y][x].stage < packet.WHEAT_4 {
-
-						s.tiles[y][x].last = time.Now()
-						s.tiles[y][x].stage += 1
-					}
-					p.PushByte(byte(s.tiles[y][x].stage))
-				}
-			}
-			s.mutex.Unlock()
-
-			conn.Write(packet.NewPacket(packet.SEND_PLANT_SERVER, p))
-
+			s.askPlantClient(conn)
 		case packet.SEND_HARVEST_CLIENT:
-			x, _ := packet.ReadByte(conn)
-			y, _ := packet.ReadByte(conn)
-
-			s.mutex.Lock()
-			if s.tiles[y][x].stage == packet.WHEAT_4 {
-				s.wheat += 1
-				s.tiles[y][x].stage = packet.WHEAT_0
-			}
-			s.mutex.Unlock()
-
+			s.sendHarvestClient(conn)
 		case packet.ASK_STATS_CLIENT:
-			var p packet.Packet
-
-			s.mutex.RLock()
-			p.PushUint32(s.wheat)
-			s.mutex.RUnlock()
-
-			conn.Write(packet.NewPacket(packet.SEND_STATS_SERVER, p))
+			s.askStatsClient(conn)
 		}
 	}
 }
