@@ -2,11 +2,13 @@
 
 A vibrant, isometric, multiplayer-centric farming game written in Go.
 
-## Progress
-
-![screenshot](feiok.png)
+## Galery
 
 *Note: may show an outdated state of development.*
+
+![screenshot](galery/feiok_0.png) ![screenshot](galery/feiok_1.png)
+
+**Plant, harvest, and hang out with your friends!**
 
 ## TODO
 
