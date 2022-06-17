@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/google/uuid v1.3.0
-	github.com/hajimehoshi/ebiten/v2 v2.3.3
+	github.com/hajimehoshi/ebiten/v2 v2.3.4
 )
 
 require (
